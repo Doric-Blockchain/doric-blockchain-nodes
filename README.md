@@ -11,10 +11,18 @@ This document show how do setup of a new full node or validator
 
 ## ENODES
 
-| NETWORK | TYPE      | NUMBER | HOST                                                                                                                                                          |
-| ------- | --------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| mainnet | fullnode  | 1      | enode://d1766a67c000f63868d28347c3de1acc6c7b6bcf46270039a0a72acdb35a1002ad9fd6169affaf9567a5a068d6692460a7293da8437b3d9d9f6b9739e9a7afb7@146.190.50.161:30303 |
-| testnet | fullnode  | 1      | enode://e5f55e330905d804146f93eca7a05d994de6b3a50cb49416349c079ab9757659b798adeb57f3cfbcc7e32aa464d245beebbf2ee5dee8744ea7f8479e1d1a6f71@137.184.35.48:30303  |
+| NETWORK | TYPE      | NUMBER | HOST                                                                                                                                                       |
+| ------- | --------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| mainnet | Validator | 1      | enode://8758dfb5eb6b185d55a5a316dee425b224f9185490b1035f180b99f724ed4f2245990eabe49e3817c0376e7d6109adecab1d1e4d0cf05e162e658fb871dbee30@10.0.12.128:30303 |
+| mainnet | Validator | 2      | enode://814c09d8be7a77d2b326291baef40ff693ab90b321ed66d8da0e373a17c7a148d2d8639827cb5f31ceb8ac28788f481f7b9967e50dd1e71c46583c71eaf1acf9@10.0.1.161:30303  |
+| mainnet | Validator | 3      | enode://8758dfb5eb6b185d55a5a316dee425b224f9185490b1035f180b99f724ed4f2245990eabe49e3817c0376e7d6109adecab1d1e4d0cf05e162e658fb871dbee30@10.0.12.128:30303 |
+| mainnet | fullnode  | 1      | enode://336f7ef25477d71cf1bd42e350b06553c07f377b9dea95c936321f37d5149de865dba2168226f68946be639744852d3d96d8e9254c915d4a622da91a0ed07849@10.0.10.161:30303 |
+| testnet | Validator | 1      | enode://74c64dd94df4946a6d5aa089b866cb12f458a20f65ea09a12c261544b1734bdc9bc604b4f64e19ce294020d00cea0b3f93b9fc040651e689e2188f833dfcc570@10.0.13.166:30303 |
+| testnet | Validator | 2      | enode://814c09d8be7a77d2b326291baef40ff693ab90b321ed66d8da0e373a17c7a148d2d8639827cb5f31ceb8ac28788f481f7b9967e50dd1e71c46583c71eaf1acf9@10.0.1.161:30303  |
+| testnet | Validator | 3      | enode://8758dfb5eb6b185d55a5a316dee425b224f9185490b1035f180b99f724ed4f2245990eabe49e3817c0376e7d6109adecab1d1e4d0cf05e162e658fb871dbee30@10.0.12.128:30303 |
+| testnet | Validator | 4      | enode://f3397088430a7fc422dc5c8e6869c891b12ff78afb7f98eadc39729a4837656f768bede39f54fdfaa5e75eb5fd833a2c5a696df37cf33f5c584c9efd2234b79f@10.0.11.115:30303 |
+| testnet | Validator | 5      | enode://10f2dc788d37dc07551e88a40820c9b24f4b5b5442db3b2c61f85c7be6f7395e056f4210b2bb24a77d1ed0b3489581d19bf995632a218c98e18d3baa492b1eaa@10.0.1.26:30303   |
+| testnet | fullnode  | 1      | enode://336f7ef25477d71cf1bd42e350b06553c07f377b9dea95c936321f37d5149de865dba2168226f68946be639744852d3d96d8e9254c915d4a622da91a0ed07849@10.0.10.161:30303 |
 
 ## Preparation Setup
 
@@ -75,7 +83,8 @@ geth --datadir . account new
 - Access your EC2 Instance created in last step
 - Access server that was created in before step
 - Access the folder `Config` in this repository and Copy content of script `add-pkg-server.sh` in your server
-- Modify the file `add-pkg-server.sh` in your server with env as example below
+- Access the folder `Config` in this repository and Copy content of script `run-docker.sh` in your server
+- Modify the file `run-docker.sh` in your server with env as example below
 
 ```bash
 export STATIC_NODES_ARRAY="[ENODES]"
@@ -101,10 +110,32 @@ chmod +x add-pkg-server.sh && chmod +x run-docker.sh
 ```
 
 - Run bash
-  - Preparing and run docker
+  - Preparing to docker
   ```
   ./add-pkg-server.sh
   ```
+  - Run docker
+  ```
+  ./run-docker.sh
+  ```
+
 ### 4 - Allow that the validator valid new blocks
 
-- Contact [Doric Support](https://discord.gg/vYBUr3zKXj) to receive validade permission:
+- Access all validators
+- run command bellow in terminal
+
+```
+curl -d '{"jsonrpc":"2.0","method": "clique_propose", "params": ["PUBLIC-ADDRESS-OF-WALLET", true],"id":1}' -H 'Content-Type: application/json' http://localhost:8545
+```
+
+- Your will receive the follow message
+
+```
+{"jsonrpc":"2.0","id":1,"result":null}
+```
+
+### 5 - Update List Enodes
+
+- get enode id of the your new validator or node and update list
+
+curl -d '{"jsonrpc":"2.0","method": "clique_propose", "params": ["0xd181274ab532f795e7250b41d840cb3f922cf5fb", true],"id":1}' -H 'Content-Type: application/json' http://localhost:8545
