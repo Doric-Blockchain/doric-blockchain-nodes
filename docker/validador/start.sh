@@ -62,17 +62,10 @@ fi
 
 cd blockchain
 
-# Create Static Nodes JSON
-STATIC_NODES_ARRAY=${STATIC_NODES_ARRAY//"["/'["'}
-STATIC_NODES_ARRAY=${STATIC_NODES_ARRAY//"]"/'"]'}
-STATIC_NODES_ARRAY=${STATIC_NODES_ARRAY//',enode'/'","enode'}
-
-# echo ${STATIC_NODES_ARRAY=} > static-nodes.json
-
 # Create Config File
-CONFIG_FILE_CONTENT=$'[Eth]\nSyncMode = "full"\nNetworkId = '"${CHAIN_ID}"$'\n\n[Node]\nDataDir = "./"\nIPCPath = "./geth.ipc"\n\n[Node.P2P]\nNoDiscovery = false\n\nStaticNodes ='
+CONFIG_FILE_CONTENT=$(printf "[Eth]\nSyncMode = '%s'\n\nNetworkId = %s\n\n\n[Node]\nDataDir = \"./\"\nIPCPath = \"./geth.ipc\"\n\n[Node.P2P]\nNoDiscovery = false\n\nStaticNodes = "%s"\n" "$SYNC_MODE" "$CHAIN_ID" "$STATIC_NODES_ARRAY")
 
-echo "$CONFIG_FILE_CONTENT" "${STATIC_NODES_ARRAY}" > config.toml
+echo "$CONFIG_FILE_CONTENT" > ./config.toml
 
 # Initialize Node
 if ! [ -d "geth" ]; then
@@ -80,11 +73,13 @@ if ! [ -d "geth" ]; then
 fi
 
 NODEIP=$(curl ifconfig.me/ip)
-SYNC_MODE_ARGS="--syncmode ${SYNC_MODE}"
+SYNC_MODE_ARGS="--syncmode $SYNC_MODE"
 
-if [SYNC_GCMODE != "" ]; then
-    SYNC_MODE_ARGS="${SYNC_MODE_ARGS} --gcmode ${SYNC_GCMODE}"
+if [ $SYNC_GCMODE != "" ]; then
+    SYNC_MODE_ARGS="$SYNC_MODE_ARGS --gcmode $SYNC_GCMODE"
 fi
+
+echo "$SYNC_MODE_ARGS"
 
 
 if [ $TYPE_BLOCKCHAIN == "VALIDATOR" ]; then
@@ -98,14 +93,14 @@ if [ $TYPE_BLOCKCHAIN == "VALIDATOR" ]; then
     fi
 
     # Run Validator Node
-    ./utils/geth --datadir=./ --config ./config.toml ${SYNC_MODE_ARGS} --rpc --rpcapi \
+    ./utils/geth --datadir=./ --config ./config.toml $SYNC_MODE_ARGS \
     --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODEPORT" \
     --http --http.addr 0.0.0.0 --http.port $NODE_HTTP_PORT --http.api admin,eth,miner,net,txpool,clique,personal,web3,debug \
     --ws --ws.addr 0.0.0.0 --ws.port $NODE_WS_PORT --ws.origins "" --ws.api "web3, net, eth," \
     --allow-insecure-unlock --unlock $WALLET_ACCOUNT --password ./keystore/password.txt \
     --mine --miner.etherbase $WALLET_ACCOUNT
 else
-    ./utils/geth --datadir=./ --config ./config.toml ${SYNC_MODE_ARGS} --rpc --rpcapi --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODEPORT" \
+    ./utils/geth --datadir=./ --config ./config.toml $SYNC_MODE_ARGS --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODEPORT" \
     --http --http.addr 0.0.0.0 --http.port $NODE_HTTP_PORT --http.api admin,eth,miner,net,txpool,personal,web3,debug \
     --ws --ws.addr 0.0.0.0 --ws.port $NODE_WS_PORT --ws.origins "" --ws.api "web3, net, eth"
 fi
