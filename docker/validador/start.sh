@@ -80,6 +80,12 @@ if ! [ -d "geth" ]; then
 fi
 
 NODEIP=$(curl ifconfig.me/ip)
+SYNC_MODE_ARGS="--syncmode ${SYNC_MODE}"
+
+if [SYNC_GCMODE != "" ]; then
+    SYNC_MODE_ARGS="${SYNC_MODE_ARGS} --gcmode ${SYNC_GCMODE}"
+fi
+
 
 if [ $TYPE_BLOCKCHAIN == "VALIDATOR" ]; then
 
@@ -92,14 +98,14 @@ if [ $TYPE_BLOCKCHAIN == "VALIDATOR" ]; then
     fi
 
     # Run Validator Node
-    ./utils/geth --datadir=./ --config ./config.toml --syncmode ${SYNC_MODE} --rpc --rpcapi \
+    ./utils/geth --datadir=./ --config ./config.toml ${SYNC_MODE_ARGS} --rpc --rpcapi \
     --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODEPORT" \
     --http --http.addr 0.0.0.0 --http.port $NODE_HTTP_PORT --http.api admin,eth,miner,net,txpool,clique,personal,web3,debug \
     --ws --ws.addr 0.0.0.0 --ws.port $NODE_WS_PORT --ws.origins "" --ws.api "web3, net, eth," \
     --allow-insecure-unlock --unlock $WALLET_ACCOUNT --password ./keystore/password.txt \
     --mine --miner.etherbase $WALLET_ACCOUNT
 else
-    ./utils/geth --datadir=./ --config ./config.toml --syncmode ${SYNC_MODE} --rpc --rpcapi --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODEPORT" \
+    ./utils/geth --datadir=./ --config ./config.toml ${SYNC_MODE_ARGS} --rpc --rpcapi --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODEPORT" \
     --http --http.addr 0.0.0.0 --http.port $NODE_HTTP_PORT --http.api admin,eth,miner,net,txpool,personal,web3,debug \
     --ws --ws.addr 0.0.0.0 --ws.port $NODE_WS_PORT --ws.origins "" --ws.api "web3, net, eth"
 fi
