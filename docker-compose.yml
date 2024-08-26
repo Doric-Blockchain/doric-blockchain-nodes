@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 # networks:
 #   blockchain:
@@ -48,5 +48,10 @@ services:
     #   - stats
     volumes:
       - ./data-blockchain:/blockchain
+    logging: # custom log max size and files
+      driver: "json-file"
+      options:
+        max-size: "1k"
+        max-file: "3"
     # networks:
     #   - blockchain
