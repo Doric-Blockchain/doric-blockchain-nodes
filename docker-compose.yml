@@ -1,24 +1,4 @@
-version: "3.8"
-
-# networks:
-#   blockchain:
-#     driver: bridge
-
 services:
-  # stats:
-  #   build:
-  #     context: ./docker/stats/
-  #     dockerfile: Dockerfile
-  #   environment:
-  #     - WS_SECRET=${WS_SECRET}
-  #     - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-  #     - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-  #     - AWS_REGION=${AWS_REGION}
-  #   ports:
-  #     - 3000:3000
-  #   networks:
-  #     - blockchain
-
   validator:
     build:
       context: ./docker/validador/
@@ -28,8 +8,8 @@ services:
     environment:
       - STATIC_NODES_ARRAY=${STATIC_NODES_ARRAY}
       - CHAIN_ID=${CHAIN_ID}
-      - NODEPORT=${NODEPORT}
-      - TYPE_BLOCKCHAIN=${TYPE_BLOCKCHAIN}
+      - NODE_PORT=${NODE_PORT}
+      - IS_VALIDATOR_NODE=${IS_VALIDATOR_NODE}
       - SYNC_MODE=${SYNC_MODE}
       - SYNC_GCMODE=${SYNC_GCMODE}
       - NODE_HTTP_PORT=${NODE_HTTP_PORT}
@@ -38,7 +18,7 @@ services:
       - ACCOUNT_FILE_CONTENT=${ACCOUNT_FILE_CONTENT}
       - WALLET_ACCOUNT=${WALLET_ACCOUNT}
       - PASSWORD_NODE=${PASSWORD_NODE}
-      - GIT_COMMIT_HASH=${GIT_COMMIT_HASH}
+      - GIT_COMMIT_HASH_GETH=${GIT_COMMIT_HASH_GETH}
       - STATS_SERVER=${STATS_SERVER}
       - STATS_NODE_USER=${STATS_NODE_USER}
       - STATS_NODE_PASSWORD=${STATS_NODE_PASSWORD}
@@ -46,8 +26,6 @@ services:
       - 30303:30303
       - 8545:8545
       - 8546:8546
-    # depends_on:
-    #   - stats
     volumes:
       - ./data-blockchain:/blockchain
     logging: # custom log max size and files
@@ -55,5 +33,3 @@ services:
       options:
         max-size: "1k"
         max-file: "3"
-    # networks:
-    #   - blockchain
