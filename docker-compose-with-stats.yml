@@ -1,4 +1,27 @@
+networks:
+  blockchain:
+    driver: bridge
+
 services:
+  stats:
+    build:
+      context: ./docker/stats/
+      dockerfile: Dockerfile
+    environment:
+      - WS_SECRET=${WS_SECRET}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
+    logging: # custom log max size and files
+      driver: "json-file"
+      options:
+        max-size: "1k"
+        max-file: "3"
+    ports:
+      - 3000:3000
+    networks:
+      - blockchain
+
   validator:
     build:
       context: ./docker/validador/
@@ -26,6 +49,8 @@ services:
       - 30303:30303
       - 8545:8545
       - 8546:8546
+    depends_on:
+      - stats
     volumes:
       - ./data-blockchain:/blockchain
     logging: # custom log max size and files
@@ -33,3 +58,5 @@ services:
       options:
         max-size: "1k"
         max-file: "3"
+    networks:
+      - blockchain

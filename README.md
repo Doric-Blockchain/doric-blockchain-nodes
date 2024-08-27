@@ -36,8 +36,6 @@ This document show how do setup of a new full node or validator
 | testnet | Validator | 5      | enode://10f2dc788d37dc07551e88a40820c9b24f4b5b5442db3b2c61f85c7be6f7395e056f4210b2bb24a77d1ed0b3489581d19bf995632a218c98e18d3baa492b1eaa@10.0.1.26:30303   |
 | testnet | fullnode  | 1      | enode://336f7ef25477d71cf1bd42e350b06553c07f377b9dea95c936321f37d5149de865dba2168226f68946be639744852d3d96d8e9254c915d4a622da91a0ed07849@10.0.10.161:30303 |
 
-## Preparation Setup
-
 ### 1 - Create to EC2 AWS
 
 - Access AWS EC2 Instances
@@ -55,7 +53,7 @@ This document show how do setup of a new full node or validator
 - **`Config Storage`** with `150 GB` and `gp2`
 - Click in `Launch Instance`
 
-### 2 - Create a new Wallet (Only Validator)
+### 2 - (Validators only) Create a new Wallet
 
 - Install `Geth`
   - Access [Download Geth](https://geth.ethereum.org/downloads)
@@ -90,54 +88,29 @@ geth --datadir . account new
 - Access keystore folder
 - Copy the content of wallet that was generate
 
-### 3 - Copy Content Script
+### 3 - Configure your .env file
 
-- Access your EC2 Instance created in last step
-- Access server that was created in before step
-- Access the folder `Config` in this repository and Copy content of script `add-pkg-server.sh` in your server
-- Access the folder `Config` in this repository and Copy content of script `run-docker.sh` in your server
-- Modify the file `run-docker.sh` in your server with env as example below
+- Copy the contents of the `.env.example` file into your `.env` file and configure it as you need.
 
-```bash
-export STATIC_NODES_ARRAY="[ENODES]"
-export CHAIN_ID=[CHAINID]
-export NODEPORT="30303"
-export TYPE_BLOCKCHAIN=[TYPE]
-export NODE_HTTP_PORT="8545"
-export NODE_WS_PORT="8546"
-export BLOCKCHAIN_ENVIRONMENT=[NETWORK]
-export ACCOUNT_FILE_CONTENT=[CONTENT FILE OF WALLET]
-export WALLET_ACCOUNT=[PUBLIC ADDRESS OF WALLET]
-export PASSWORD_NODE=[PASSWORD OF WALLET]
-export GIT_COMMIT_HASH="df52967ff6080a27243569020ff64cd956fb8362"
-export STATS_SERVER=[STATS SERVER]
-export STATS_NODE_USER=[NAME NODE]
-export STATS_NODE_PASSWORD="pzJx&n2rOtO#B29" ' > ./.env
+### 4 - Run the Node
+
+```sh
+docker compose -f docker-compose.yml up --build -d
 ```
 
-- Add allow to execute
+- It takes some time build, start and then fully sync the node, you can use the following request to check sync progress:
 
+```sh
+curl -d '{"jsonrpc":"2.0","method": "eth_syncing", "params": [],"id":1}' -H 'Content-Type: application/json' http://localhost:8545
 ```
-chmod +x add-pkg-server.sh && chmod +x run-docker.sh
-```
 
-- Run bash
-  - Preparing to docker
-  ```
-  ./add-pkg-server.sh
-  ```
-  - Run docker
-  ```
-  ./run-docker.sh
-  ```
-
-### 4 - Allow that the validator valid new blocks
+### 5 - (Validators only) Propose account to be signer
 
 - Access all validators
 - run command bellow in terminal
 
-```
-curl -d '{"jsonrpc":"2.0","method": "clique_propose", "params": ["PUBLIC-ADDRESS-OF-WALLET", true],"id":1}' -H 'Content-Type: application/json' http://localhost:8545
+```sh
+curl -d '{"jsonrpc":"2.0","method": "clique_propose", "params": ["PUBLIC_ADDRESS", true],"id":1}' -H 'Content-Type: application/json' http://localhost:8545
 ```
 
 - Your will receive the follow message
@@ -146,8 +119,10 @@ curl -d '{"jsonrpc":"2.0","method": "clique_propose", "params": ["PUBLIC-ADDRESS
 {"jsonrpc":"2.0","id":1,"result":null}
 ```
 
-### 5 - Update List Enodes
+### 6 - (Validators only) Update List Enodes
 
-- get enode id of the your new validator or node and update list
+- Get the new enode id and update the enodes list.
 
-curl -d '{"jsonrpc":"2.0","method": "clique_propose", "params": ["0xd181274ab532f795e7250b41d840cb3f922cf5fb", true],"id":1}' -H 'Content-Type: application/json' http://localhost:8545
+```sh
+curl -d '{"jsonrpc":"2.0","method": "clique_propose", "params": ["PUBLIC_ADDRESS", true],"id":1}' -H 'Content-Type: application/json' http://localhost:8545
+```

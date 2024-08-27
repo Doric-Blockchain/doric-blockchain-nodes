@@ -1,6 +1,5 @@
 #/bin/bash
 
-
 # Install jq
 apt install jq
 
@@ -22,8 +21,8 @@ if ! [ -d "go-ethereum" ]; then
     git clone https://github.com/ethereum/go-ethereum.git
     cd go-ethereum
 
-    if [ $GIT_COMMIT_HASH != "" ]; then
-        git checkout ${GIT_COMMIT_HASH}
+    if [ $GIT_COMMIT_HASH_GETH != "" ]; then
+        git checkout ${GIT_COMMIT_HASH_GETH}
     fi
 
     make all
@@ -48,11 +47,7 @@ if ! [ 0 -lt $(ls blockchain/utils/geth* 2>/dev/null | wc -w) ]; then
     cp go-ethereum/build/bin/geth blockchain/utils/geth
 fi
 
-# rm -rf go-ethereum
-
 if ! [ -d "blockchain/geth" ]; then
-    echo "PASSOU blockchain/geth GENESIS"
-
     if [ $BLOCKCHAIN_ENVIRONMENT == "MAINNET" ]; then
         cp genesis/mainnet.json blockchain/genesis.json
     else
@@ -60,30 +55,30 @@ if ! [ -d "blockchain/geth" ]; then
     fi
 fi
 
-cd blockchain
-
-# Create Static Nodes JSON
-STATIC_NODES_ARRAY=${STATIC_NODES_ARRAY//"["/'["'}
-STATIC_NODES_ARRAY=${STATIC_NODES_ARRAY//"]"/'"]'}
-STATIC_NODES_ARRAY=${STATIC_NODES_ARRAY//',enode'/'","enode'}
-
-# echo ${STATIC_NODES_ARRAY=} > static-nodes.json
 
 # Create Config File
-CONFIG_FILE_CONTENT=$'[Eth]\nSyncMode = "full"\nNetworkId = '"${CHAIN_ID}"$'\n\n[Node]\nDataDir = "./"\nIPCPath = "./geth.ipc"\n\n[Node.P2P]\nNoDiscovery = false\n\nStaticNodes ='
-
-echo "$CONFIG_FILE_CONTENT" "${STATIC_NODES_ARRAY}" > config.toml
+cd blockchain
+CONFIG_FILE_CONTENT=$(printf "[Eth]\nSyncMode = '%s'\n\nNetworkId = %s\n\n\n[Node]\nDataDir = \"./\"\nIPCPath = \"./geth.ipc\"\n\n[Node.P2P]\nNoDiscovery = false\n\nStaticNodes = "%s"\n" "$SYNC_MODE" "$CHAIN_ID" "$STATIC_NODES_ARRAY")
+echo "$CONFIG_FILE_CONTENT" > ./config.toml
 
 # Initialize Node
 if ! [ -d "geth" ]; then
     ./utils/geth --datadir ./ init ./genesis.json
 fi
 
+# Set Node IP and Sync Mode
 NODEIP=$(curl ifconfig.me/ip)
+SYNC_MODE_ARGS="--syncmode $SYNC_MODE" # "snap", "full" or "light"
 
-if [ $TYPE_BLOCKCHAIN == "VALIDATOR" ]; then
+# Set SYNC_GCMODE to "archive" for block explorers/indexing data
+if [ $SYNC_GCMODE != "" ]; then
+    SYNC_MODE_ARGS="$SYNC_MODE_ARGS --gcmode $SYNC_GCMODE"
+fi
 
-    # Run Node
+if [ $IS_VALIDATOR_NODE == "true" ]; then
+    # Configure Validator Node Account
+
+    # Add Account Password
     echo ${PASSWORD_NODE} > ./keystore/password.txt
 
     # Create Account File
@@ -92,15 +87,15 @@ if [ $TYPE_BLOCKCHAIN == "VALIDATOR" ]; then
     fi
 
     # Run Validator Node
-    ./utils/geth --datadir=./ --config ./config.toml --syncmode 'full' \
-    --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODEPORT" \
-    --http --http.addr 0.0.0.0 --http.port $NODE_HTTP_PORT --http.api admin,eth,miner,net,txpool,clique,personal,web3 \
+    ./utils/geth --datadir=./ --config ./config.toml $SYNC_MODE_ARGS \
+    --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODE_PORT" \
+    --http --http.addr 0.0.0.0 --http.port $NODE_HTTP_PORT --http.api admin,eth,miner,net,txpool,clique,personal,web3,debug \
     --ws --ws.addr 0.0.0.0 --ws.port $NODE_WS_PORT --ws.origins "" --ws.api "web3, net, eth," \
     --allow-insecure-unlock --unlock $WALLET_ACCOUNT --password ./keystore/password.txt \
-    --mine --miner.etherbase $WALLET_ACCOUNT --ethstats "$STATS_NODE_USER:$STATS_NODE_PASSWORD@$STATS_SERVER"
+    --mine --miner.etherbase $WALLET_ACCOUNT
 else
-    ./utils/geth --datadir=./ --config ./config.toml --syncmode 'full' --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODEPORT" \
-    --http --http.addr 0.0.0.0 --http.port $NODE_HTTP_PORT --http.api admin,eth,miner,net,txpool,personal,web3 \
-    --ws --ws.addr 0.0.0.0 --ws.port $NODE_WS_PORT --ws.origins "" --ws.api "web3, net, eth" \
-    --ethstats "$STATS_NODE_USER:$STATS_NODE_PASSWORD@$STATS_SERVER"
+    # Run Node without validator account
+    ./utils/geth --datadir=./ --config ./config.toml $SYNC_MODE_ARGS --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODE_PORT" \
+    --http --http.addr 0.0.0.0 --http.port $NODE_HTTP_PORT --http.api admin,eth,miner,net,txpool,personal,web3,debug \
+    --ws --ws.addr 0.0.0.0 --ws.port $NODE_WS_PORT --ws.origins "" --ws.api "web3, net, eth"
 fi
