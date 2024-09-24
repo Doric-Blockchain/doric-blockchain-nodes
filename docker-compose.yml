@@ -28,6 +28,7 @@ services:
       - 8546:8546
     volumes:
       - ./data-blockchain:/blockchain
+      - ./utils:/utils
     logging: # custom log max size and files
       driver: "json-file"
       options:
