@@ -32,6 +32,12 @@ if ! [ -d "blockchain" ]; then
     mkdir blockchain
 fi
 
+# Create Utils Directory
+if ! [ -d "blockchain/utils" ]; then
+    echo "CREATE blockchain/utils"
+    mkdir blockchain/utils
+fi
+
 # Copy GETH Binary
 if ! [ 0 -lt $(ls blockchain/utils/geth* 2>/dev/null | wc -w) ]; then
     echo "COPY GETH"
