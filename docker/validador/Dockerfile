@@ -11,5 +11,5 @@ COPY . ./
 RUN apt-get update && \
     apt-get install -y software-properties-common snapd && \
     rm -rf /var/lib/apt/lists/*
-RUN snap install go --channel=1.16/stable --classic
+RUN snap install --classic --channel=1.20/stable go
 RUN apt-get update -y && apt-get upgrade -y && apt-get install build-essential bison wget curl make git -y

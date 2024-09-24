@@ -6,7 +6,7 @@ apt install jq -y
 # Create Account File
 if ! which go > /dev/null; then
     echo "INSTALL Golang"
-    sudo snap install go --channel=1.16/stable --classic
+    sudo snap install --classic --channel=1.20/stable go
 fi
 
 if ! which make > /dev/null; then
