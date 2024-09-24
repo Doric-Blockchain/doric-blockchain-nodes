@@ -2,7 +2,7 @@
 ## FROM ubuntu:latest -platform=linux/amd64 ubuntu:latest 
 
 ## OTHER BUILD 
-FROM ubuntu:latest
+FROM ubuntu:18.04
 
 WORKDIR /
 
