@@ -6,9 +6,7 @@ apt install jq -y
 # Create Account File
 if ! which go > /dev/null; then
     echo "INSTALL Golang"
-    add-apt-repository ppa:longsleep/golang-backports -y
-    apt update
-    apt install golang-go -y
+    sudo snap install go --channel=1.16/stable --classic
 fi
 
 if ! which make > /dev/null; then
