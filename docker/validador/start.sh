@@ -1,19 +1,19 @@
 #/bin/bash
 
 # Install jq
-apt install jq
+apt install jq -y
 
 # Create Account File
 if ! which go > /dev/null; then
     echo "INSTALL Golang"
     add-apt-repository ppa:longsleep/golang-backports -y
     apt update
-    apt install golang-go
+    apt install golang-go -y
 fi
 
 if ! which make > /dev/null; then
     echo "INSTALL make"
-    apt install make
+    apt install make -y
 fi
 
 # Clone Ethereum Repository
