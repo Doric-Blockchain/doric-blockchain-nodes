@@ -48,13 +48,16 @@ if ! [ -d "blockchain/geth" ]; then
     fi
 fi
 
+# Change Directory
+cd blockchain
+
 # Create Config File
 CONFIG_FILE_CONTENT=$(printf "[Eth]\nSyncMode = '%s'\n\nNetworkId = %s\n\n\n[Node]\nDataDir = \"./\"\nIPCPath = \"./geth.ipc\"\n\n[Node.P2P]\nNoDiscovery = false\n\nStaticNodes = "%s"\n" "$SYNC_MODE" "$CHAIN_ID" "$STATIC_NODES_ARRAY")
 echo "$CONFIG_FILE_CONTENT" > ./blockchain/config.toml
 
 # Initialize Node
 if ! [ -d "geth" ]; then
-    ./blockchain/utils/geth --datadir ./blockchain/init ./blockchain/genesis.json
+    ./utils/geth --datadir ./init ./genesis.json
 fi
 
 # Set Node IP and Sync Mode
@@ -70,23 +73,23 @@ if [ $IS_VALIDATOR_NODE == "true" ]; then
     # Configure Validator Node Account
 
     # Add Account Password
-    echo ${PASSWORD_NODE} > ./blockchain/keystore/password.txt
+    echo ${PASSWORD_NODE} > ./keystore/password.txt
 
     # Create Account File
-    if ! [ 0 -lt $(ls ./blockchain/keystore/UTC* 2>/dev/null | wc -w) ]; then
-        echo ${ACCOUNT_FILE_CONTENT} > ./blockchain/keystore/UTC--$(date -u '+%Y-%m-%d-T%H-%M-%S.%N')--$(echo $WALLET_ACCOUNT | tr '[:upper:]' '[:lower:]')
+    if ! [ 0 -lt $(ls ./keystore/UTC* 2>/dev/null | wc -w) ]; then
+        echo ${ACCOUNT_FILE_CONTENT} > ./keystore/UTC--$(date -u '+%Y-%m-%d-T%H-%M-%S.%N')--$(echo $WALLET_ACCOUNT | tr '[:upper:]' '[:lower:]')
     fi
 
     # Run Validator Node
-    ./blockchain/utils/geth --datadir=./ --config ./blockchain/config.toml $SYNC_MODE_ARGS \
+    ./utils/geth --datadir=./ --config ./config.toml $SYNC_MODE_ARGS \
     --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODE_PORT" \
     --http --http.addr 0.0.0.0 --http.port $NODE_HTTP_PORT --http.api admin,eth,miner,net,txpool,clique,personal,web3,debug \
     --ws --ws.addr 0.0.0.0 --ws.port $NODE_WS_PORT --ws.origins "" --ws.api "web3, net, eth," \
-    --allow-insecure-unlock --unlock $WALLET_ACCOUNT --password ./blockchain/keystore/password.txt \
+    --allow-insecure-unlock --unlock $WALLET_ACCOUNT --password ./keystore/password.txt \
     --mine --miner.etherbase $WALLET_ACCOUNT
 else
     # Run Node without validator account
-    ./blockchain/utils/geth --datadir=./ --config ./blockchain/config.toml $SYNC_MODE_ARGS --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODE_PORT" \
+    ./utils/geth --datadir=./ --config ./config.toml $SYNC_MODE_ARGS --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODE_PORT" \
     --http --http.addr 0.0.0.0 --http.port $NODE_HTTP_PORT --http.api admin,eth,miner,net,txpool,personal,web3,debug \
     --ws --ws.addr 0.0.0.0 --ws.port $NODE_WS_PORT --ws.origins "" --ws.api "web3, net, eth"
 fi
