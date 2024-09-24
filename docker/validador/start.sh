@@ -54,7 +54,7 @@ echo "$CONFIG_FILE_CONTENT" > ./blockchain/config.toml
 
 # Initialize Node
 if ! [ -d "geth" ]; then
-    ./utils/geth --datadir ./blockchain/init ./blockchain/genesis.json
+    ./blockchain/utils/geth --datadir ./blockchain/init ./blockchain/genesis.json
 fi
 
 # Set Node IP and Sync Mode
@@ -78,7 +78,7 @@ if [ $IS_VALIDATOR_NODE == "true" ]; then
     fi
 
     # Run Validator Node
-    ./utils/geth --datadir=./ --config ./blockchain/config.toml $SYNC_MODE_ARGS \
+    ./blockchain/utils/geth --datadir=./ --config ./blockchain/config.toml $SYNC_MODE_ARGS \
     --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODE_PORT" \
     --http --http.addr 0.0.0.0 --http.port $NODE_HTTP_PORT --http.api admin,eth,miner,net,txpool,clique,personal,web3,debug \
     --ws --ws.addr 0.0.0.0 --ws.port $NODE_WS_PORT --ws.origins "" --ws.api "web3, net, eth," \
@@ -86,7 +86,7 @@ if [ $IS_VALIDATOR_NODE == "true" ]; then
     --mine --miner.etherbase $WALLET_ACCOUNT
 else
     # Run Node without validator account
-    ./utils/geth --datadir=./ --config ./blockchain/config.toml $SYNC_MODE_ARGS --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODE_PORT" \
+    ./blockchain/utils/geth --datadir=./ --config ./blockchain/config.toml $SYNC_MODE_ARGS --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODE_PORT" \
     --http --http.addr 0.0.0.0 --http.port $NODE_HTTP_PORT --http.api admin,eth,miner,net,txpool,personal,web3,debug \
     --ws --ws.addr 0.0.0.0 --ws.port $NODE_WS_PORT --ws.origins "" --ws.api "web3, net, eth"
 fi
