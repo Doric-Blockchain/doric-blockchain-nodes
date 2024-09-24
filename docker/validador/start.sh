@@ -59,7 +59,7 @@ cd blockchain
 
 # Create Config File
 CONFIG_FILE_CONTENT=$(printf "[Eth]\nSyncMode = '%s'\n\nNetworkId = %s\n\n\n[Node]\nDataDir = \"./\"\nIPCPath = \"./geth.ipc\"\n\n[Node.P2P]\nNoDiscovery = false\n\nStaticNodes = "%s"\n" "$SYNC_MODE" "$CHAIN_ID" "$STATIC_NODES_ARRAY")
-echo "$CONFIG_FILE_CONTENT" > ./blockchain/config.toml
+echo "$CONFIG_FILE_CONTENT" > ./config.toml
 
 # Initialize Node
 if ! [ -d "geth" ]; then
