@@ -51,23 +51,23 @@ if [ $IS_VALIDATOR_NODE == "true" ]; then
     # Configure Validator Node Account
 
     # Add Account Password
-    echo ${PASSWORD_NODE} > ./keystore/password.txt
+    echo ${PASSWORD_NODE} > ./blockchain/keystore/password.txt
 
     # Create Account File
-    if ! [ 0 -lt $(ls ./keystore/UTC* 2>/dev/null | wc -w) ]; then
-        echo ${ACCOUNT_FILE_CONTENT} > ./keystore/UTC--$(date -u '+%Y-%m-%d-T%H-%M-%S.%N')--$(echo $WALLET_ACCOUNT | tr '[:upper:]' '[:lower:]')
+    if ! [ 0 -lt $(ls ./blockchain/keystore/UTC* 2>/dev/null | wc -w) ]; then
+        echo ${ACCOUNT_FILE_CONTENT} > ./blockchain/keystore/UTC--$(date -u '+%Y-%m-%d-T%H-%M-%S.%N')--$(echo $WALLET_ACCOUNT | tr '[:upper:]' '[:lower:]')
     fi
 
     # Run Validator Node
-    ./utils/geth1.14.9 --datadir=./ --config ./config.toml $SYNC_MODE_ARGS \
+    ./utils/geth1.14.9 --datadir=./ --config ./blockchain/config.toml $SYNC_MODE_ARGS \
     --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODE_PORT" \
     --http --http.addr 0.0.0.0 --http.port $NODE_HTTP_PORT --http.api admin,eth,miner,net,txpool,clique,personal,web3,debug \
     --ws --ws.addr 0.0.0.0 --ws.port $NODE_WS_PORT --ws.origins "" --ws.api "web3, net, eth," \
-    --allow-insecure-unlock --unlock $WALLET_ACCOUNT --password ./keystore/password.txt \
+    --allow-insecure-unlock --unlock $WALLET_ACCOUNT --password ./blockchain/keystore/password.txt \
     --mine --miner.etherbase $WALLET_ACCOUNT
 else
     # Run Node without validator account
-    ./utils/geth1.14.9 --datadir=./ --config ./config.toml $SYNC_MODE_ARGS --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODE_PORT" \
+    ./utils/geth1.14.9 --datadir=./ --config ./blockchain/config.toml $SYNC_MODE_ARGS --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODE_PORT" \
     --http --http.addr 0.0.0.0 --http.port $NODE_HTTP_PORT --http.api admin,eth,miner,net,txpool,personal,web3,debug \
     --ws --ws.addr 0.0.0.0 --ws.port $NODE_WS_PORT --ws.origins "" --ws.api "web3, net, eth"
 fi
