@@ -58,12 +58,12 @@ fi
 cd blockchain
 
 # Create Config File
-CONFIG_FILE_CONTENT=$(printf "[Eth]\nSyncMode = '%s'\n\nNetworkId = %s\n\n\n[Node]\nDataDir = \"./\"\nIPCPath = \"./geth.ipc\"\n\n[Node.P2P]\nNoDiscovery = false\n\nStaticNodes = "%s"\n" "$SYNC_MODE" "$CHAIN_ID" "$STATIC_NODES_ARRAY")
+CONFIG_FILE_CONTENT=$(printf "[Eth]\nSyncMode = '%s'\n\nNetworkId = %s\n\n\n[Node]\nDataDir = \"./\"\nIPCPath = \"./geth.ipc\"\n\n[Node.P2P]\nNoDiscovery = false\n\nStaticNodes = "%s"\n" "$SYNC_MODE" "$CHAIN_ID" $STATIC_NODES_ARRAY)
 echo "$CONFIG_FILE_CONTENT" > ./config.toml
 
 # Initialize Node
 if ! [ -d "geth" ]; then
-    ./utils/geth --datadir ./init ./genesis.json
+    ./utils/geth --datadir ./ init ./genesis.json
 fi
 
 # Set Node IP and Sync Mode
@@ -73,6 +73,11 @@ SYNC_MODE_ARGS="--syncmode $SYNC_MODE" # "snap", "full" or "light"
 # Set SYNC_GCMODE to "archive" for block explorers/indexing data
 if [ $SYNC_GCMODE != "" ]; then
     SYNC_MODE_ARGS="$SYNC_MODE_ARGS --gcmode $SYNC_GCMODE"
+fi
+
+JWT_ARGS=""
+if [ $JWT_SECRET != "" ]; then
+    JWT_ARGS="--authrpc.addr localhost --authrpc.port 8551 --authrpc.vhosts localhost --authrpc.jwtsecret $JWT_SECRET"
 fi
 
 if [ $IS_VALIDATOR_NODE == "true" ]; then
@@ -87,7 +92,7 @@ if [ $IS_VALIDATOR_NODE == "true" ]; then
     fi
 
     # Run Validator Node
-    ./utils/geth --datadir=./ --config ./config.toml $SYNC_MODE_ARGS \
+    ./utils/geth --datadir=./ --config ./config.toml $SYNC_MODE_ARGS $JWT_ARGS \
     --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODE_PORT" \
     --http --http.addr 0.0.0.0 --http.port $NODE_HTTP_PORT --http.api admin,eth,miner,net,txpool,clique,personal,web3,debug \
     --ws --ws.addr 0.0.0.0 --ws.port $NODE_WS_PORT --ws.origins "" --ws.api "web3, net, eth," \
@@ -95,7 +100,7 @@ if [ $IS_VALIDATOR_NODE == "true" ]; then
     --mine --miner.etherbase $WALLET_ACCOUNT
 else
     # Run Node without validator account
-    ./utils/geth --datadir=./ --config ./config.toml $SYNC_MODE_ARGS --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODE_PORT" \
+    ./utils/geth --datadir=./ --config ./config.toml $SYNC_MODE_ARGS $JWT_ARGS --networkid $CHAIN_ID --nat extip:"$NODEIP" --port "$NODE_PORT" \
     --http --http.addr 0.0.0.0 --http.port $NODE_HTTP_PORT --http.api admin,eth,miner,net,txpool,personal,web3,debug \
     --ws --ws.addr 0.0.0.0 --ws.port $NODE_WS_PORT --ws.origins "" --ws.api "web3, net, eth"
 fi
