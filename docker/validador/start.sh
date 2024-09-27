@@ -4,7 +4,7 @@
 apt install jq -y
 
 # Install Go version 1.20
-tar -C /usr/local -xzf ./utils/go1.20.4.linux-amd64.tar.gz
+tar -C /usr/local -xzf ./utils/go1.23.1.linux-amd64.tar.gz
 export PATH=$PATH:/usr/local/go/bin
 
 # Install Make
