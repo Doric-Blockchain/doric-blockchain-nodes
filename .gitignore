@@ -2,3 +2,7 @@
 .env
 # Docker
 /data-blockchain
+
+/merge/consensus/mnemonics.yaml
+/merge/consensus/tranches
+/merge/consensus/genesis.ssz

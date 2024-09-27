@@ -1,7 +1,7 @@
 services:
   ubuntu-geth:
     build:
-      context: ./docker/merge/
+      context: ./merge/
       dockerfile: Dockerfile
     restart: always
     command: bash -c "chmod +x ./start.sh && ./start.sh"
