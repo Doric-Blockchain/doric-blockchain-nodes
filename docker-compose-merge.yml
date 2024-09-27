@@ -1,5 +1,5 @@
 services:
-  validator:
+  ubuntu-geth:
     build:
       context: ./docker/merge/
       dockerfile: Dockerfile
