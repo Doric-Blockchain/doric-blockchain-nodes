@@ -61,9 +61,15 @@ cd blockchain
 CONFIG_FILE_CONTENT=$(printf "[Eth]\nSyncMode = '%s'\n\nNetworkId = %s\n\n\n[Node]\nDataDir = \"./\"\nIPCPath = \"./geth.ipc\"\n\n[Node.P2P]\nNoDiscovery = false\n\nStaticNodes = "%s"\n" "$SYNC_MODE" "$CHAIN_ID" $STATIC_NODES_ARRAY)
 echo "$CONFIG_FILE_CONTENT" > ./config.toml
 
+BOTNODES_ARGS=""
+
+if [ $BOOT_NODES != "" ]; then
+    BOTNODES_ARGS="--bootnodes $BOOT_NODES"
+fi
+
 # Initialize Node
 if ! [ -d "geth" ]; then
-    ./utils/geth --datadir ./ init ./genesis.json
+    ./utils/geth --datadir ./ init ./genesis.json $BOTNODES_ARGS
 fi
 
 # Set Node IP and Sync Mode
