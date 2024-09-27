@@ -21,10 +21,10 @@ TERMINAL_BLOCK_HASH_ACTIVATION_EPOCH: 1449986
 # ---------------------------------------------------------------
 MIN_GENESIS_ACTIVE_VALIDATOR_COUNT: 5
 # Dec 1, 2020, 12pm UTC
-MIN_GENESIS_TIME: 1633267481
-GENESIS_FORK_VERSION: 0x1
-# 3600 seconds (1 hour)
-GENESIS_DELAY: 3600
+MIN_GENESIS_TIME: 1727532000
+GENESIS_FORK_VERSION: 0x00000001
+# 7200 seconds (2 hours)
+GENESIS_DELAY: 7200
 
 # Forking
 # ---------------------------------------------------------------
